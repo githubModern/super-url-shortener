@@ -1,0 +1,129 @@
+<?php
+// © Atia Hegazy — atiaeno.com
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Affiliate;
+use App\Models\Payout;
+use App\Models\PayoutAuditLog;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class PayoutController extends Controller
+{
+    /**
+     * Story 4.7: Pending payout queue.
+     */
+    public function index(): Response
+    {
+        $payouts = Payout::with(['affiliate.user:id,name,email', 'affiliate.tier:id,name'])
+            ->pending()
+            ->latest()
+            ->paginate(20);
+
+        return Inertia::render('Admin/Payouts/Index', [
+            'payouts' => $payouts,
+        ]);
+    }
+
+    /**
+     * Story 4.7: Approve a payout.
+     */
+    public function approve(Request $request, Payout $payout): RedirectResponse
+    {
+        abort_unless($payout->isPending(), 422, 'Payout is not in pending state.');
+
+        $oldStatus = $payout->status;
+        $payout->update([
+            'status'       => Payout::STATUS_APPROVED,
+            'processed_by' => Auth::id(),
+            'processed_at' => now(),
+        ]);
+
+        $this->logAudit($payout, $oldStatus, Payout::STATUS_APPROVED, $request->note);
+
+        return back()->with('success', 'Payout approved.');
+    }
+
+    /**
+     * Story 4.7: Reject a payout.
+     */
+    public function reject(Request $request, Payout $payout): RedirectResponse
+    {
+        abort_unless($payout->isPending(), 422, 'Payout is not in pending state.');
+
+        $validated = $request->validate([
+            'note' => ['required', 'string', 'max:500'],
+        ]);
+
+        $oldStatus = $payout->status;
+        $payout->update([
+            'status'       => Payout::STATUS_REJECTED,
+            'admin_note'   => $validated['note'],
+            'processed_by' => Auth::id(),
+            'processed_at' => now(),
+        ]);
+
+        $this->logAudit($payout, $oldStatus, Payout::STATUS_REJECTED, $validated['note']);
+
+        return back()->with('success', 'Payout rejected.');
+    }
+
+    /**
+     * Story 4.7: Mark a payout as paid.
+     */
+    public function markPaid(Request $request, Payout $payout): RedirectResponse
+    {
+        abort_unless($payout->isApproved(), 422, 'Payout must be approved before marking paid.');
+
+        $oldStatus = $payout->status;
+        $payout->update([
+            'status'       => Payout::STATUS_PAID,
+            'processed_by' => Auth::id(),
+            'processed_at' => now(),
+        ]);
+
+        $affiliate = $payout->affiliate;
+        $affiliate->decrement('pending_earnings', $payout->amount);
+        $affiliate->increment('paid_earnings', $payout->amount);
+
+        $this->logAudit($payout, $oldStatus, Payout::STATUS_PAID, $request->note);
+
+        return back()->with('success', 'Payout marked as paid.');
+    }
+
+    /**
+     * Story 4.8: View audit log for a payout.
+     */
+    public function auditLog(Payout $payout): Response
+    {
+        $logs = $payout->auditLogs()
+            ->with('actor:id,name')
+            ->orderBy('created_at')
+            ->get();
+
+        return Inertia::render('Admin/Payouts/AuditLog', [
+            'payout' => $payout->load('affiliate.user:id,name,email'),
+            'logs'   => $logs,
+        ]);
+    }
+
+    /**
+     * Story 4.8: Append-only audit log entry.
+     */
+    private function logAudit(Payout $payout, string $oldStatus, string $newStatus, ?string $note): void
+    {
+        PayoutAuditLog::create([
+            'payout_id'  => $payout->id,
+            'actor_id'   => Auth::id(),
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
+            'note'       => $note,
+            'created_at' => now(),
+        ]);
+    }
+}

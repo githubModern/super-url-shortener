@@ -1,0 +1,45 @@
+<?php
+// © Atia Hegazy — atiaeno.com
+
+namespace App\Http\Controllers;
+
+use App\Models\Link;
+use Illuminate\Http\Response;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+
+class QrCodeController extends Controller
+{
+    /**
+     * Story 3.4: Generate a QR code for a link in SVG or PNG format.
+     */
+    public function generate(Link $link, string $format = 'svg'): Response
+    {
+        $this->authorize('view', $link);
+
+        $shortUrl = $link->short_url;
+
+        if ($format === 'png') {
+            $qr = QrCode::format('png')
+                ->size(400)
+                ->errorCorrection('H')
+                ->generate($shortUrl);
+
+            return response($qr, 200, [
+                'Content-Type'        => 'image/png',
+                'Content-Disposition' => "attachment; filename=\"qr-{$link->short_code}.png\"",
+            ]);
+        }
+
+        // Default: SVG
+        $qr = QrCode::format('svg')
+            ->size(400)
+            ->errorCorrection('H')
+            ->generate($shortUrl);
+
+        return response($qr, 200, [
+            'Content-Type'        => 'image/svg+xml',
+            'Content-Disposition' => "attachment; filename=\"qr-{$link->short_code}.svg\"",
+        ]);
+    }
+}
+

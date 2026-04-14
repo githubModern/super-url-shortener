@@ -1,0 +1,59 @@
+<?php
+// © Atia Hegazy — atiaeno.com
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
+
+class Setting extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'key',
+        'value',
+        'group',
+        'description',
+    ];
+
+    protected $casts = [
+        'value' => 'json',
+    ];
+
+    private static string $cacheKey = 'app_settings';
+
+    private static int $cacheTTL = 300; // 5 minutes
+
+    public static function get(string $key, mixed $default = null): mixed
+    {
+        $settings = Cache::remember(self::$cacheKey, self::$cacheTTL, function () {
+            return self::all()->keyBy('key')->toArray();
+        });
+
+        return $settings[$key]['value'] ?? $default;
+    }
+
+    public static function set(string $key, mixed $value): void
+    {
+        self::updateOrCreate(
+            ['key' => $key],
+            ['value' => $value]
+        );
+
+        Cache::forget(self::$cacheKey);
+    }
+
+    public static function getGroup(string $group): array
+    {
+        return self::where('group', $group)
+            ->pluck('value', 'key')
+            ->toArray();
+    }
+
+    public static function clearCache(): void
+    {
+        Cache::forget(self::$cacheKey);
+    }
+}
