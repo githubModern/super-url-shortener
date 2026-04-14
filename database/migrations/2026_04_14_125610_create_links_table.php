@@ -25,7 +25,6 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamp('expires_at')->nullable();
             $table->bigInteger('clicks_count')->default(0);
-            $table->string('ad_override', 50)->nullable();
             $table->timestamps();
             $table->softDeletes();
 

@@ -1,7 +1,7 @@
 <!-- © Atia Hegazy — atiaeno.com -->
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 const props = defineProps({
@@ -20,9 +20,12 @@ const props = defineProps({
     },
 });
 
-const copied      = ref(false);
-const embedCopied = ref(false);
-const showEmbed   = ref(false);
+const copied       = ref(false);
+const embedCopied  = ref(false);
+const showEmbed    = ref(false);
+const showReportModal = ref(false);
+const reportSubmitted = ref(false);
+const reportError = ref('');
 
 const shortUrl = computed(() => props.link.short_url ?? `${window.location.origin}/${props.link.short_code}`);
 
@@ -82,6 +85,40 @@ const qrPngUrl = computed(() => route('links.qr', { link: props.link.id, format:
 const maxDevice  = computed(() => Math.max(1, ...(props.analytics.clicks_by_device  || []).map(d => d.total)));
 const maxCountry = computed(() => Math.max(1, ...(props.analytics.clicks_by_country || []).map(d => d.total)));
 const maxRef     = computed(() => Math.max(1, ...(topReferrers.value).map(d => d.total)));
+
+// Report form
+const reportForm = useForm({
+    reason: 'spam',
+    details: '',
+});
+
+const reasonOptions = [
+    { value: 'spam', label: 'Spam / Unwanted content' },
+    { value: 'phishing', label: 'Phishing / Fraud' },
+    { value: 'malware', label: 'Malware / Virus' },
+    { value: 'violence', label: 'Violence / Harmful content' },
+    { value: 'other', label: 'Other' },
+];
+
+const submitReport = () => {
+    reportError.value = '';
+    reportSubmitted.value = false;
+    
+    reportForm.post(route('links.report', props.link.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            reportSubmitted.value = true;
+            reportForm.reset();
+            setTimeout(() => {
+                showReportModal.value = false;
+                reportSubmitted.value = false;
+            }, 2000);
+        },
+        onError: (errors) => {
+            reportError.value = errors.error || 'Failed to submit report. Please try again.';
+        },
+    });
+};
 </script>
 
 <template>
@@ -109,6 +146,7 @@ const maxRef     = computed(() => Math.max(1, ...(topReferrers.value).map(d => d
             <div class="link-hero__actions">
                 <Link :href="route('links.edit', link.id)" class="btn-ghost">Edit</Link>
                 <button @click="deleteLink" class="btn-danger">Delete</button>
+                <button @click="showReportModal = true" class="text-xs text-gray-500 hover:text-red-500 mt-2">Report Link</button>
             </div>
         </div>
 
@@ -245,6 +283,41 @@ const maxRef     = computed(() => Math.max(1, ...(topReferrers.value).map(d => d
                             <div class="bar-fill" :style="{ width: `${Math.round((row.total / maxDevice) * 100)}%`, background: '#A855F7' }" />
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Modal (Story 6.1) -->
+        <div v-if="showReportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full mx-4">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Report Link</h3>
+                    
+                    <div v-if="reportSubmitted" class="p-4 bg-green-100 text-green-800 rounded mb-4">
+                        ✓ Report submitted. Thank you for helping keep our platform safe.
+                    </div>
+                    
+                    <form v-else @submit.prevent="submitReport">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reason</label>
+                                <select v-model="reportForm.reason" class="block w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700">
+                                    <option v-for="opt in reasonOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Details (optional)</label>
+                                <textarea v-model="reportForm.details" rows="3" class="block w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700" placeholder="Additional information..."></textarea>
+                            </div>
+                            <div v-if="reportError" class="p-3 bg-red-100 text-red-800 rounded text-sm">{{ reportError }}</div>
+                        </div>
+                        <div class="flex justify-end gap-3 mt-6">
+                            <button type="button" @click="showReportModal = false" class="px-4 py-2 border rounded text-gray-700 dark:text-gray-300">Cancel</button>
+                            <button type="submit" :disabled="reportForm.processing" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50">
+                                {{ reportForm.processing ? 'Submitting...' : 'Submit Report' }}
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

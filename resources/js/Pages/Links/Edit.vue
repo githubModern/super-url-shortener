@@ -6,6 +6,7 @@ import { ref } from 'vue';
 
 const props = defineProps({
     link: { type: Object, required: true },
+    ads: { type: Array, default: () => [] },
 });
 
 const form = useForm({
@@ -14,6 +15,8 @@ const form = useForm({
     og_title: props.link.og_title ?? '',
     og_description: props.link.og_description ?? '',
     is_active: props.link.is_active ?? true,
+    ad_override: props.link.ad_override ?? 'inherit',
+    ad_id: props.link.ad_id ?? null,
 });
 
 const showAdvanced = ref(!!(props.link.og_title || props.link.og_description));
@@ -77,6 +80,23 @@ const submit = () => {
                             </span>
                             <span class="toggle__label">{{ form.is_active ? 'Active' : 'Inactive' }}</span>
                         </label>
+                    </div>
+
+                    <!-- Ad Settings -->
+                    <div class="field">
+                        <label class="field__label">Ad Display</label>
+                        <select v-model="form.ad_override" class="field__input">
+                            <option value="inherit">Inherit global settings</option>
+                            <option value="disable">Disable ads for this link</option>
+                            <option value="force">Force specific ad</option>
+                        </select>
+                    </div>
+                    <div v-if="form.ad_override === 'force'" class="field">
+                        <label class="field__label">Select Ad</label>
+                        <select v-model="form.ad_id" class="field__input">
+                            <option :value="null">-- Select an ad --</option>
+                            <option v-for="ad in ads" :key="ad.id" :value="ad.id">{{ ad.name }} ({{ ad.format }})</option>
+                        </select>
                     </div>
 
                     <!-- Advanced OG toggle -->

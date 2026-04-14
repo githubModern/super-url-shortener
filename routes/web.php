@@ -1,7 +1,11 @@
 <?php
 // © Atia Hegazy — atiaeno.com
 
+use App\Http\Controllers\Admin\AdController;
 use App\Http\Controllers\Admin\AffiliateTierController;
+use App\Http\Controllers\Admin\ModerationController;
+use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PayoutController;
 use App\Http\Controllers\AffiliateController;
 use App\Http\Controllers\BulkLinkController;
@@ -9,6 +13,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GuestLinkController;
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\RedirectController;
 use App\Http\Controllers\SitemapController;
@@ -39,15 +44,19 @@ Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 Route::get('/auth/{provider}', [SocialAuthController::class, 'redirect'])->name('social.redirect');
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])->name('social.callback');
 
-// Public redirect endpoint (short URLs)
+// ── Auth Routes (login, register, etc) ───────────────────────────────────────
+require __DIR__.'/auth.php';
+
+// ── Dashboard (must be before catch-all) ──────────────────────────────────────
+Route::get('/dashboard', DashboardController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
+
+// Public redirect endpoint (short URLs) — MUST BE LAST
 Route::get('/{shortCode}', RedirectController::class)
     ->where('shortCode', '[a-zA-Z0-9]+')
     ->middleware(\App\Http\Middleware\RateLimitRedirects::class)
     ->name('redirect');
-
-Route::get('/dashboard', DashboardController::class)
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -93,7 +102,35 @@ Route::middleware('auth')->group(function () {
         Route::post('payouts/{payout}/reject', [PayoutController::class, 'reject'])->name('payouts.reject');
         Route::post('payouts/{payout}/mark-paid', [PayoutController::class, 'markPaid'])->name('payouts.mark-paid');
         Route::get('payouts/{payout}/audit-log', [PayoutController::class, 'auditLog'])->name('payouts.audit-log');
-    });
-});
 
-require __DIR__.'/auth.php';
+        // Ads (Stories 5.1 - 5.4)
+        Route::get('ads', [\App\Http\Controllers\Admin\AdController::class, 'index'])->name('ads.index');
+        Route::post('ads', [\App\Http\Controllers\Admin\AdController::class, 'store'])->name('ads.store');
+        Route::patch('ads/{ad}', [\App\Http\Controllers\Admin\AdController::class, 'update'])->name('ads.update');
+        Route::delete('ads/{ad}', [\App\Http\Controllers\Admin\AdController::class, 'destroy'])->name('ads.destroy');
+
+        // Moderation (Stories 6.1 - 6.4)
+        Route::get('moderation', [ModerationController::class, 'index'])->name('moderation.index');
+        Route::post('moderation/reports/{report}/review', [ModerationController::class, 'review'])->name('moderation.review');
+        Route::post('moderation/batch', [ModerationController::class, 'batchReview'])->name('moderation.batch');
+        Route::get('moderation/activity-log', [ModerationController::class, 'activityLog'])->name('moderation.activity-log');
+
+        // Settings (Stories 7.1 - 7.10)
+        Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+        Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
+        Route::post('settings/purge-cache', [SettingsController::class, 'purgeCache'])->name('settings.purge-cache');
+        Route::get('settings/export', [SettingsController::class, 'export'])->name('settings.export');
+        Route::post('settings/import', [SettingsController::class, 'import'])->name('settings.import');
+        Route::get('settings/backup', [SettingsController::class, 'backup'])->name('settings.backup');
+
+        // User Management (Stories 8.1 - 8.3)
+        Route::get('users', [UserController::class, 'index'])->name('users.index');
+        Route::post('users/{user}/role', [UserController::class, 'updateRole'])->name('users.role');
+        Route::post('users/{user}/ban', [UserController::class, 'ban'])->name('users.ban');
+        Route::post('users/{user}/unban', [UserController::class, 'unban'])->name('users.unban');
+        Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    });
+    
+    // Link reporting (Story 6.1 - public endpoint)
+    Route::post('links/{link}/report', [ReportController::class, 'store'])->name('links.report');
+});

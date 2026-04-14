@@ -25,6 +25,9 @@ class Link extends Model
         'is_active',
         'expires_at',
         'clicks_count',
+        'report_count',
+        'auto_suspended_at',
+        'ad_id',
         'ad_override',
     ];
 
@@ -32,6 +35,8 @@ class Link extends Model
         'is_active' => 'boolean',
         'expires_at' => 'datetime',
         'clicks_count' => 'integer',
+        'report_count' => 'integer',
+        'auto_suspended_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -42,6 +47,16 @@ class Link extends Model
     public function clicks(): HasMany
     {
         return $this->hasMany(Click::class);
+    }
+
+    public function ad(): BelongsTo
+    {
+        return $this->belongsTo(Ad::class);
+    }
+
+    public function reports(): HasMany
+    {
+        return $this->hasMany(Report::class);
     }
 
     public function getShortUrlAttribute(): string

@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Ad;
 use App\Models\Link;
 use App\Services\ShortCodeService;
 use Illuminate\Http\Request;
@@ -166,6 +167,7 @@ class LinkController extends Controller
 
         return Inertia::render('Links/Edit', [
             'link' => $link,
+            'ads' => Ad::active()->get(),
         ]);
     }
 
@@ -181,7 +183,14 @@ class LinkController extends Controller
             'campaign_tag' => ['nullable', 'string', 'max:100'],
             'og_title' => ['nullable', 'string', 'max:255'],
             'og_description' => ['nullable', 'string'],
+            'ad_override' => ['required', 'in:inherit,disable,force'],
+            'ad_id' => ['nullable', 'exists:ads,id'],
         ]);
+
+        // Clear ad_id if not using force override
+        if ($validated['ad_override'] !== 'force') {
+            $validated['ad_id'] = null;
+        }
 
         $link->update($validated);
 
