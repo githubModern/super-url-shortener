@@ -470,6 +470,11 @@ const copyCode = async (text, key) => {
                         <span class="error-desc">Alias already exists</span>
                     </div>
                     <div class="error-item">
+                        <code class="error-code">422</code>
+                        <span class="error-name">Unprocessable</span>
+                        <span class="error-desc">Validation error (invalid parameters)</span>
+                    </div>
+                    <div class="error-item">
                         <code class="error-code">429</code>
                         <span class="error-name">Too Many Requests</span>
                         <span class="error-desc">Rate limit exceeded</span>

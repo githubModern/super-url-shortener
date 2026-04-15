@@ -1,7 +1,10 @@
 <!-- © Atia Hegazy — atiaeno.com -->
 <script setup>
-import { ref } from 'vue';
-import TextInput from './TextInput.vue';
+import { ref, useAttrs } from 'vue';
+
+const attrs = useAttrs();
+
+defineOptions({ inheritAttrs: false });
 
 const props = defineProps({
     modelValue: String,
@@ -35,10 +38,11 @@ const togglePassword = () => {
 
 <template>
     <div class="password-input-wrap">
-        <TextInput
+        <input
             :id="id"
             :type="showPassword ? 'text' : 'password'"
             class="password-input"
+            :class="attrs.class"
             :value="modelValue"
             @input="$emit('update:modelValue', $event.target.value)"
             :required="required"
@@ -90,11 +94,19 @@ const togglePassword = () => {
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
 .password-input {
-    width: 100%;
-    padding-right: 2.75rem;
+    width: 100% !important;
+    padding: 0.875rem 2.75rem 0.875rem 2.5rem !important;
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    color: #1a1a1a;
+    background: #fafafa !important;
+    border: 1px solid #e5e5e5 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
 }
 
 .toggle-btn {

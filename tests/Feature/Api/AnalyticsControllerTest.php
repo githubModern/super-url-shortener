@@ -254,7 +254,7 @@ class AnalyticsControllerTest extends TestCase
             'referrer_domain' => null,
         ]);
         
-        // Create click with Google referrer
+        // Create click with Google referrer - use exact domain
         Click::create([
             'link_id' => $this->link->id,
             'ip_hash' => 'hash2',
@@ -270,7 +270,12 @@ class AnalyticsControllerTest extends TestCase
             ->getJson('/api/v1/links/' . $this->link->id . '/analytics');
 
         $response->assertStatus(200)
-            ->assertJsonPath('data.referrers.direct', 2);
+            ->assertJsonPath('data.referrers.direct', 1);
+        
+        // Check that google.com referrer exists and has count 1
+        $referrers = $response->json('data.referrers');
+        $this->assertArrayHasKey('google.com', $referrers);
+        $this->assertEquals(1, $referrers['google.com']);
     }
 
     /** @test */
