@@ -29,12 +29,22 @@ Route::get('/', function () {
         'donationEnabled' => (bool) config('app.donation_enabled', false),
         'donationButtonId' => config('app.donation_button_id', ''),
     ]);
-})->name('home');
+})->name('welcome');
 
 // ── Story 1.4: Guest link shortening ─────────────────────────────────────────
 Route::post('/guest/shorten', [GuestLinkController::class, 'store'])
     ->middleware('throttle:30,1')
     ->name('guest.shorten');
+
+// ── Legal Pages ───────────────────────────────────────────────────────────────
+Route::get('/privacy', fn() => Inertia::render('Legal/Privacy'))->name('legal.privacy');
+Route::get('/terms', fn() => Inertia::render('Legal/Terms'))->name('legal.terms');
+Route::get('/cookies', fn() => Inertia::render('Legal/Cookies'))->name('legal.cookies');
+Route::get('/gdpr', fn() => Inertia::render('Legal/Gdpr'))->name('legal.gdpr');
+
+// ── Help & Documentation ───────────────────────────────────────────────────────
+Route::get('/help', fn() => Inertia::render('HelpCenter'))->name('help.center');
+Route::get('/api-docs', fn() => Inertia::render('ApiDocs'))->name('api.docs');
 
 // ── Story 1.8: Sitemap & robots ───────────────────────────────────────────────
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');

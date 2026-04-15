@@ -1,8 +1,8 @@
 <!-- © Atia Hegazy — atiaeno.com -->
 
 <p align="center">
-  <h1 align="center">ShortLink</h1>
-  <p align="center">A powerful URL shortener with affiliate program, QR codes, and admin panel</p>
+  <h1 align="center">Super URL Shortener</h1>
+  <p align="center">A powerful URL shortener with affiliate program, QR codes, and admin panel , STATICS , ADM PANEL</p>
 </p>
 
 <p align="center">

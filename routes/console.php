@@ -12,3 +12,6 @@ Artisan::command('inspire', function () {
 
 // Story 3.12: Run IP anonymization daily at 02:00
 Schedule::job(new AnonymizeIpJob)->dailyAt('02:00');
+
+// Update disposable email domains list weekly
+Schedule::command('disposable:update')->weekly();
