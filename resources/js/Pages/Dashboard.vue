@@ -20,31 +20,11 @@ const props = defineProps({
     },
 });
 
-const statCards = computed(() => [
-    {
-        label: 'Total Links',
-        value: props.stats.total_links,
-        icon: 'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71',
-        accent: '#22D3EE',
-    },
-    {
-        label: 'Total Clicks',
-        value: props.stats.total_clicks,
-        icon: 'M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122',
-        accent: '#22C55E',
-    },
-    {
-        label: 'Clicks Today',
-        value: props.stats.clicks_today,
-        icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
-        accent: '#F59E0B',
-    },
-    {
-        label: 'Active Links',
-        value: props.stats.active_links,
-        icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
-        accent: '#A855F7',
-    },
+const statItems = computed(() => [
+    { num: '01', label: 'Total Links', value: props.stats.total_links },
+    { num: '02', label: 'Total Clicks', value: props.stats.total_clicks },
+    { num: '03', label: 'Clicks Today', value: props.stats.clicks_today },
+    { num: '04', label: 'Active Links', value: props.stats.active_links },
 ]);
 
 const formatDate = (dateStr) => {
@@ -59,81 +39,82 @@ const formatDate = (dateStr) => {
     <AuthenticatedLayout>
         <template #header>Dashboard</template>
 
-        <!-- Stat Cards -->
-        <div class="stats-grid">
-            <div
-                v-for="card in statCards"
-                :key="card.label"
-                class="stat-card"
-                :style="`--accent: ${card.accent}`"
-            >
-                <div class="stat-card__icon-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="stat-card__icon">
-                        <path :d="card.icon" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <div class="stat-card__body">
-                    <span class="stat-card__value">{{ card.value.toLocaleString() }}</span>
-                    <span class="stat-card__label">{{ card.label }}</span>
-                </div>
-                <div class="stat-card__bar" />
+        <div class="dashboard-editorial">
+            <!-- Editorial Masthead -->
+            <div class="dashboard-masthead">
+                <span class="masthead-label">Vol. 01 — Control Panel</span>
+                <h1 class="masthead-title">Overview</h1>
             </div>
-        </div>
 
-        <!-- Quick Create -->
-        <div class="quick-create">
-            <h2 class="section-title">Shorten a URL</h2>
-            <div class="quick-create__row">
-                <form @submit.prevent="$inertia.visit(route('links.create'))" class="quick-create__form">
+            <!-- Stat Cards - Editorial Specifications -->
+            <div class="specs-section">
+                <h3 class="section-heading">Specifications</h3>
+                <div class="specs-grid">
+                    <div
+                        v-for="item in statItems"
+                        :key="item.num"
+                        class="spec-card"
+                    >
+                        <span class="spec-number">{{ item.num }}</span>
+                        <span class="spec-label-text">{{ item.label }}</span>
+                        <span class="spec-value">{{ item.value.toLocaleString() }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Create - Editorial Form -->
+            <div class="editorial-form-section">
+                <label class="form-label">Shorten a URL</label>
+                <div class="editorial-input-wrap">
                     <input
                         type="url"
                         placeholder="https://your-long-url.com/paste-here"
-                        class="quick-create__input"
+                        class="editorial-input"
                         readonly
                         @focus="$inertia.visit(route('links.create'))"
                     />
-                    <Link :href="route('links.create')" class="btn-primary">
-                        Shorten
+                    <Link :href="route('links.create')" class="editorial-submit">
+                        Create
                     </Link>
-                </form>
-            </div>
-        </div>
-
-        <!-- Recent Links -->
-        <div class="recent-section">
-            <div class="section-header">
-                <h2 class="section-title">Recent Links</h2>
-                <Link :href="route('links.index')" class="section-link">View all →</Link>
-            </div>
-
-            <div v-if="recentLinks.length === 0" class="empty-state">
-                <p>No links yet. Create your first short link above.</p>
-            </div>
-
-            <div v-else class="links-table">
-                <div class="links-table__head">
-                    <span>Destination</span>
-                    <span>Short URL</span>
-                    <span>Clicks</span>
-                    <span>Created</span>
-                    <span></span>
                 </div>
-                <div
-                    v-for="link in recentLinks"
-                    :key="link.id"
-                    class="links-table__row"
-                >
-                    <span class="links-table__dest">{{ link.destination_url }}</span>
-                    <a
-                        :href="`/${link.short_code}`"
-                        target="_blank"
-                        class="links-table__short"
-                    >{{ link.short_code }}</a>
-                    <span class="links-table__clicks">{{ link.clicks_count }}</span>
-                    <span class="links-table__date">{{ formatDate(link.created_at) }}</span>
-                    <div class="links-table__actions">
-                        <Link :href="route('links.show', link.id)" class="action-btn">Stats</Link>
-                        <Link :href="route('links.edit', link.id)" class="action-btn">Edit</Link>
+            </div>
+
+            <!-- Recent Links - Typography Forward Table -->
+            <div class="links-section">
+                <div class="links-header">
+                    <h3 class="section-heading">Recent Links</h3>
+                    <Link :href="route('links.index')" class="view-all-link">View all archive →</Link>
+                </div>
+
+                <div v-if="recentLinks.length === 0" class="empty-state">
+                    <p class="empty-text">No entries recorded. Create your first short link above.</p>
+                </div>
+
+                <div v-else class="editorial-table">
+                    <div class="table-head">
+                        <span class="col-dest">Destination</span>
+                        <span class="col-short">Short URL</span>
+                        <span class="col-clicks">Clicks</span>
+                        <span class="col-date">Created</span>
+                        <span class="col-actions"></span>
+                    </div>
+                    <div
+                        v-for="link in recentLinks"
+                        :key="link.id"
+                        class="table-row"
+                    >
+                        <span class="cell-dest">{{ link.destination_url }}</span>
+                        <a
+                            :href="`/${link.short_code}`"
+                            target="_blank"
+                            class="cell-short"
+                        >{{ link.short_code }}</a>
+                        <span class="cell-clicks">{{ link.clicks_count }}</span>
+                        <span class="cell-date">{{ formatDate(link.created_at) }}</span>
+                        <div class="cell-actions">
+                            <Link :href="route('links.show', link.id)" class="table-action">Stats</Link>
+                            <Link :href="route('links.edit', link.id)" class="table-action">Edit</Link>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -142,263 +123,362 @@ const formatDate = (dateStr) => {
 </template>
 
 <style scoped>
-/* ── Stat Cards ─────────────────────────────────── */
-.stats-grid {
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Oswald:wght@500;700&display=swap');
+
+/* ── EDITORIAL DASHBOARD ─────────────────────────── */
+
+.dashboard-editorial {
+    font-family: 'Crimson Pro', serif;
+    color: #1a1a1a;
+}
+
+/* ── Masthead ──────────────────────────────────── */
+.dashboard-masthead {
+    margin-bottom: 48px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 32px;
+}
+
+.masthead-label {
+    display: block;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 16px;
+}
+
+.masthead-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -1px;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+/* ── Section Heading ───────────────────────────── */
+.section-heading {
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #666;
+    margin: 0 0 24px 0;
+}
+
+/* ── Specifications Grid ──────────────────────── */
+.specs-section {
+    margin-bottom: 48px;
+}
+
+.specs-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    background: #1a1a1a;
+}
+
+.spec-card {
+    display: flex;
+    flex-direction: column;
+    padding: 32px 28px;
+    border-right: 1px solid #2a2a2a;
+    position: relative;
+}
+
+.spec-card:last-child {
+    border-right: none;
+}
+
+.spec-number {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+}
+
+.spec-label-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 8px;
+}
+
+.spec-value {
+    font-family: 'Oswald', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: #d4af37;
+    letter-spacing: 1px;
+    line-height: 1;
+}
+
+/* ── Editorial Form ─────────────────────────────── */
+.editorial-form-section {
+    margin-bottom: 48px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid #ddd;
+}
+
+.form-label {
+    display: block;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 16px;
+}
+
+.editorial-input-wrap {
+    display: flex;
+    border: 1px solid rgba(0,0,0,0.2);
+    background: #fff;
+    padding: 4px;
+}
+
+.editorial-input {
+    flex: 1;
+    border: none;
+    padding: 20px 24px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 18px;
+    outline: none;
+    color: #1a1a1a;
+    background: transparent;
+    cursor: pointer;
+}
+
+.editorial-input::placeholder {
+    color: #bbb;
+    font-style: italic;
+}
+
+.editorial-submit {
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 20px 40px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.3s;
+    display: inline-flex;
+    align-items: center;
+}
+
+.editorial-submit:hover {
+    background: #c0392b;
+}
+
+/* ── Links Section ─────────────────────────────── */
+.links-section {
     margin-bottom: 32px;
 }
 
-.stat-card {
-    background: #141414;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
-    padding: 20px;
+.links-header {
     display: flex;
-    align-items: center;
-    gap: 16px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 200ms;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 24px;
 }
 
-.stat-card:hover {
-    border-color: var(--accent, #22D3EE);
+.view-all-link {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #666;
+    text-decoration: none;
+    transition: color 0.2s;
 }
 
-.stat-card__bar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--accent, #22D3EE);
-    opacity: 0.4;
+.view-all-link:hover {
+    color: #e74c3c;
 }
 
-.stat-card__icon-wrap {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.04);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    color: var(--accent, #22D3EE);
-}
-
-.stat-card__icon {
-    width: 20px;
-    height: 20px;
-}
-
-.stat-card__body {
+/* ── Editorial Table ───────────────────────────── */
+.editorial-table {
     display: flex;
     flex-direction: column;
 }
 
-.stat-card__value {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 26px;
-    font-weight: 700;
-    color: #FAFAFA;
-    line-height: 1;
-    letter-spacing: -0.02em;
-}
-
-.stat-card__label {
-    font-size: 12px;
-    color: #71717A;
-    margin-top: 4px;
+.table-head {
+    display: grid;
+    grid-template-columns: 3fr 1.5fr 100px 120px 160px;
+    padding: 12px 0;
+    border-bottom: 1px solid #1a1a1a;
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    color: #666;
 }
 
-/* ── Quick Create ───────────────────────────────── */
-.quick-create {
-    background: #141414;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 32px;
+.table-row {
+    display: grid;
+    grid-template-columns: 3fr 1.5fr 100px 120px 160px;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid #e0e0e0;
+    transition: background 0.2s;
 }
 
-.quick-create__form {
+.table-row:hover {
+    background: #f5f5f5;
+}
+
+.cell-dest {
+    font-size: 15px;
+    color: #444;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 16px;
+    font-style: italic;
+}
+
+.cell-short {
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    color: #e74c3c;
+    text-decoration: none;
+    letter-spacing: 1px;
+    font-weight: 500;
+}
+
+.cell-short:hover {
+    text-decoration: underline;
+}
+
+.cell-clicks {
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #1a1a1a;
+    letter-spacing: 1px;
+}
+
+.cell-date {
+    font-size: 14px;
+    color: #888;
+}
+
+.cell-actions {
     display: flex;
     gap: 12px;
 }
 
-.quick-create__input {
-    flex: 1;
-    background: #0A0A0A;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    padding: 10px 16px;
-    font-size: 14px;
-    color: #FAFAFA;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 200ms;
-}
-
-.quick-create__input:hover,
-.quick-create__input:focus {
-    border-color: #22D3EE;
-}
-
-/* ── Section ────────────────────────────────────── */
-.section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-}
-
-.section-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    color: #FAFAFA;
-    margin-bottom: 16px;
-}
-
-.section-header .section-title { margin-bottom: 0; }
-
-.section-link {
-    font-size: 13px;
-    color: #22D3EE;
-    text-decoration: none;
-    transition: opacity 200ms;
-}
-
-.section-link:hover { opacity: 0.7; }
-
-/* ── Links Table ────────────────────────────────── */
-.recent-section {
-    background: #141414;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
-    padding: 24px;
-}
-
-.links-table {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-}
-
-.links-table__head {
-    display: grid;
-    grid-template-columns: 2fr 1fr 80px 90px 140px;
-    padding: 8px 12px;
-    font-size: 11px;
-    font-weight: 600;
-    color: #52525B;
+.table-action {
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    letter-spacing: 1px;
     text-transform: uppercase;
-    letter-spacing: 0.07em;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    margin-bottom: 4px;
-}
-
-.links-table__row {
-    display: grid;
-    grid-template-columns: 2fr 1fr 80px 90px 140px;
-    align-items: center;
-    padding: 12px 12px;
-    border-radius: 8px;
-    transition: background 200ms;
-}
-
-.links-table__row:hover {
-    background: rgba(255,255,255,0.03);
-}
-
-.links-table__dest {
-    font-size: 13px;
-    color: #A1A1AA;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    padding-right: 12px;
-}
-
-.links-table__short {
-    font-size: 13px;
-    color: #22D3EE;
+    color: #666;
     text-decoration: none;
-    font-weight: 500;
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    transition: all 0.2s;
 }
 
-.links-table__short:hover {
-    text-decoration: underline;
+.table-action:hover {
+    color: #1a1a1a;
+    border-color: #1a1a1a;
 }
 
-.links-table__clicks {
-    font-size: 13px;
-    font-weight: 600;
-    color: #FAFAFA;
-}
-
-.links-table__date {
-    font-size: 12px;
-    color: #52525B;
-}
-
-.links-table__actions {
-    display: flex;
-    gap: 8px;
-}
-
-.action-btn {
-    font-size: 12px;
-    color: #71717A;
-    text-decoration: none;
-    padding: 4px 10px;
-    border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.08);
-    transition: all 200ms;
-}
-
-.action-btn:hover {
-    color: #FAFAFA;
-    border-color: rgba(255,255,255,0.2);
-}
-
-/* ── Btn Primary ────────────────────────────────── */
-.btn-primary {
-    display: inline-flex;
-    align-items: center;
-    padding: 10px 20px;
-    background: #22D3EE;
-    color: #0A0A0A;
-    font-size: 14px;
-    font-weight: 600;
-    border-radius: 8px;
-    text-decoration: none;
-    white-space: nowrap;
-    transition: opacity 200ms;
-}
-
-.btn-primary:hover { opacity: 0.85; }
-
-/* ── Empty state ────────────────────────────────── */
+/* ── Empty State ───────────────────────────────── */
 .empty-state {
-    padding: 40px 0;
+    padding: 60px 0;
     text-align: center;
-    color: #52525B;
-    font-size: 14px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.empty-text {
+    font-size: 18px;
+    color: #999;
+    font-style: italic;
+    margin: 0;
+}
+
+/* ── Responsive ────────────────────────────────── */
+@media (max-width: 1024px) {
+    .specs-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .spec-card:nth-child(2) {
+        border-right: none;
+    }
+
+    .spec-card:nth-child(1),
+    .spec-card:nth-child(2) {
+        border-bottom: 1px solid #2a2a2a;
+    }
+
+    .table-head,
+    .table-row {
+        grid-template-columns: 2fr 1fr 80px 100px 120px;
+    }
 }
 
 @media (max-width: 768px) {
-    .links-table__head,
-    .links-table__row {
-        grid-template-columns: 1fr 1fr;
+
+    .masthead-title {
+        font-size: 36px;
     }
 
-    .links-table__dest,
-    .links-table__clicks,
-    .links-table__date { display: none; }
+    .specs-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .spec-card {
+        border-right: none;
+        border-bottom: 1px solid #2a2a2a;
+    }
+
+    .spec-card:last-child {
+        border-bottom: none;
+    }
+
+    .editorial-input-wrap {
+        flex-direction: column;
+    }
+
+    .editorial-submit {
+        justify-content: center;
+    }
+
+    .table-head {
+        display: none;
+    }
+
+    .table-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        padding: 20px 0;
+    }
+
+    .cell-dest {
+        grid-column: 1 / -1;
+        padding-right: 0;
+        margin-bottom: 8px;
+    }
+
+    .cell-clicks {
+        text-align: right;
+    }
+
+    .cell-actions {
+        justify-content: flex-end;
+    }
 }
 </style>

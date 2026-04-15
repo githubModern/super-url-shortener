@@ -22,14 +22,20 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Create Link" />
+    <Head title="Create Link — Editorial" />
 
     <AuthenticatedLayout>
-        <template #header>Create Short Link</template>
+        <template #header>New Entry</template>
 
-        <div class="create-wrap">
-            <div class="create-card">
-                <form @submit.prevent="submit" class="create-form">
+        <div class="editorial-layout">
+            <!-- Main Form -->
+            <div class="editorial-form-section">
+                <div class="form-header">
+                    <span class="roman-num">II.</span>
+                    <span class="section-label">Composition</span>
+                </div>
+
+                <form @submit.prevent="submit" class="editorial-form">
                     <!-- Destination URL -->
                     <div class="field">
                         <label class="field__label">Destination URL <span class="field__required">*</span></label>
@@ -79,7 +85,8 @@ const submit = () => {
 
                     <!-- Advanced OG toggle -->
                     <button type="button" class="toggle-advanced" @click="showAdvanced = !showAdvanced">
-                        <span>{{ showAdvanced ? '▲' : '▼' }} Advanced (OG / Social Preview)</span>
+                        <span class="roman-num-small">{{ showAdvanced ? '▲' : '▼' }}</span>
+                        <span>Advanced (OG / Social Preview)</span>
                     </button>
 
                     <div v-if="showAdvanced" class="advanced-fields">
@@ -89,249 +96,386 @@ const submit = () => {
                         </div>
                         <div class="field">
                             <label class="field__label">OG Description</label>
-                            <textarea v-model="form.og_description" placeholder="Override link preview description" class="field__input field__textarea" rows="3" />
+                            <textarea v-model="form.og_description" placeholder="Override link preview description" class="field__textarea" rows="3" />
                         </div>
                     </div>
 
                     <!-- Actions -->
                     <div class="form-actions">
-                        <Link :href="route('links.index')" class="btn-ghost">Cancel</Link>
+                        <Link :href="route('links.index')" class="btn-secondary">Cancel</Link>
                         <button type="submit" class="btn-primary" :disabled="form.processing">
-                            <span v-if="form.processing">Creating…</span>
-                            <span v-else>Create Short Link</span>
+                            <span v-if="form.processing">Processing…</span>
+                            <span v-else>Create Entry</span>
                         </button>
                     </div>
                 </form>
             </div>
 
-            <!-- Tips Panel -->
-            <div class="tips-panel">
-                <h3 class="tips-title">Tips</h3>
-                <ul class="tips-list">
+            <!-- Editorial Sidebar -->
+            <aside class="editorial-sidebar">
+                <div class="sidebar-rule"></div>
+                <h3 class="sidebar-title">Editorial Notes</h3>
+                <ul class="sidebar-list">
                     <li>Custom aliases make your links more recognizable and memorable.</li>
                     <li>Campaign tags let you group and filter links in analytics.</li>
                     <li>OG fields control how links appear when shared on social media.</li>
                     <li>Links without expiry stay active indefinitely.</li>
                 </ul>
-            </div>
+
+                <div class="sidebar-rule"></div>
+
+                <div class="sidebar-quote">
+                    <p>"The most elegant solution is often the one that says less."</p>
+                    <span class="quote-attribution">— ShortLink Editorial</span>
+                </div>
+            </aside>
         </div>
     </AuthenticatedLayout>
 </template>
 
 <style scoped>
-.create-wrap {
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Oswald:wght@400;500;700&display=swap');
+
+/* ── Editorial Layout ───────────────────────────── */
+.editorial-layout {
     display: grid;
-    grid-template-columns: 1fr 280px;
-    gap: 24px;
-    max-width: 860px;
+    grid-template-columns: 1fr 300px;
+    gap: 48px;
+    max-width: 1000px;
 }
 
-.create-card {
-    background: #141414;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
-    padding: 28px;
+/* ── Form Section ────────────────────────────────── */
+.editorial-form-section {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 40px;
 }
 
-.create-form {
+.form-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #1a1a1a;
+}
+
+.roman-num {
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #e74c3c;
+    letter-spacing: 2px;
+}
+
+.roman-num-small {
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    color: #888;
+}
+
+.section-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #1a1a1a;
+}
+
+.editorial-form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 28px;
 }
 
-/* ── Fields ─────────────────────────────────────── */
+/* ── Fields ──────────────────────────────────────── */
 .field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 10px;
 }
 
 .field__label {
-    font-size: 13px;
-    font-weight: 500;
-    color: #A1A1AA;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #888;
 }
 
-.field__required { color: #EF4444; margin-left: 2px; }
-.field__optional { color: #52525B; font-weight: 400; }
+.field__required {
+    color: #e74c3c;
+    margin-left: 4px;
+}
+
+.field__optional {
+    font-family: 'Crimson Pro', serif;
+    font-size: 12px;
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0;
+    color: #aaa;
+    font-weight: 400;
+}
 
 .field__input {
-    background: #0A0A0A;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 14px;
-    color: #FAFAFA;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    padding: 12px 0;
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    color: #1a1a1a;
     outline: none;
-    transition: border-color 200ms;
-    font-family: inherit;
+    transition: border-color 0.3s;
     width: 100%;
 }
 
+.field__input::placeholder {
+    color: #bbb;
+    font-style: italic;
+}
+
 .field__input:focus {
-    border-color: #22D3EE;
-    box-shadow: 0 0 0 3px rgba(34,211,238,0.08);
+    border-bottom-color: #e74c3c;
 }
 
 .field__input--error {
-    border-color: #EF4444;
+    border-bottom-color: #e74c3c;
 }
 
 .field__textarea {
+    background: transparent;
+    border: 1px solid #ddd;
+    padding: 16px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    color: #1a1a1a;
+    outline: none;
+    transition: border-color 0.3s;
     resize: vertical;
-    min-height: 80px;
+    min-height: 100px;
+}
+
+.field__textarea:focus {
+    border-color: #e74c3c;
 }
 
 .field__prefix-wrap {
     display: flex;
     align-items: center;
-    background: #0A0A0A;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    overflow: hidden;
-    transition: border-color 200ms;
+    border-bottom: 1px solid #ddd;
+    transition: border-color 0.3s;
 }
 
 .field__prefix-wrap:focus-within {
-    border-color: #22D3EE;
+    border-bottom-color: #e74c3c;
 }
 
 .field__prefix {
-    padding: 10px 12px;
-    font-size: 13px;
-    color: #52525B;
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    color: #888;
     white-space: nowrap;
-    border-right: 1px solid rgba(255,255,255,0.08);
+    padding-right: 4px;
 }
 
 .field__input--prefixed {
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
+    border-bottom: none;
+    flex: 1;
 }
 
 .field__input--prefixed:focus {
-    border-color: transparent;
-    box-shadow: none;
+    border-bottom: none;
 }
 
 .field__error {
-    font-size: 12px;
-    color: #EF4444;
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    font-style: italic;
+    color: #e74c3c;
 }
 
 .field__hint {
-    font-size: 11px;
-    color: #52525B;
+    font-family: 'Crimson Pro', serif;
+    font-size: 12px;
+    font-style: italic;
+    color: #aaa;
 }
 
-/* ── Advanced toggle ─────────────────────────────── */
+/* ── Advanced Toggle ────────────────────────────── */
 .toggle-advanced {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 12px;
-    color: #71717A;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
     text-align: left;
     padding: 0;
-    transition: color 200ms;
+    transition: color 0.3s;
 }
 
-.toggle-advanced:hover { color: #A1A1AA; }
+.toggle-advanced:hover {
+    color: #1a1a1a;
+}
 
 .advanced-fields {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    padding: 20px;
-    background: rgba(255,255,255,0.02);
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.05);
+    gap: 24px;
+    padding: 24px;
+    background: #fafafa;
+    border-left: 3px solid #d4af37;
 }
 
 /* ── Actions ─────────────────────────────────────── */
 .form-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
-    padding-top: 8px;
-    border-top: 1px solid rgba(255,255,255,0.05);
+    gap: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #ddd;
+    margin-top: 8px;
 }
 
 .btn-primary {
     display: inline-flex;
     align-items: center;
-    padding: 10px 22px;
-    background: #22D3EE;
-    color: #0A0A0A;
-    font-size: 14px;
-    font-weight: 600;
-    border-radius: 8px;
+    padding: 14px 32px;
+    background: #e74c3c;
+    color: #fff;
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
     border: none;
     cursor: pointer;
-    transition: opacity 200ms;
+    transition: background 0.3s;
 }
 
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-primary:not(:disabled):hover { opacity: 0.85; }
+.btn-primary:hover:not(:disabled) {
+    background: #c0392b;
+}
 
-.btn-ghost {
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
     display: inline-flex;
     align-items: center;
-    padding: 10px 20px;
+    padding: 14px 28px;
     background: transparent;
-    color: #71717A;
-    font-size: 14px;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.08);
+    color: #888;
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
     text-decoration: none;
-    transition: all 200ms;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: all 0.3s;
 }
 
-.btn-ghost:hover {
-    color: #FAFAFA;
-    border-color: rgba(255,255,255,0.2);
+.btn-secondary:hover {
+    color: #1a1a1a;
+    border-color: #1a1a1a;
 }
 
-/* ── Tips Panel ─────────────────────────────────── */
-.tips-panel {
-    background: #141414;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
-    padding: 20px;
+/* ── Editorial Sidebar ───────────────────────────── */
+.editorial-sidebar {
+    padding: 32px 24px;
+    background: #1a1a1a;
+    color: #888;
     height: fit-content;
 }
 
-.tips-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: #A1A1AA;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    margin-bottom: 14px;
+.sidebar-rule {
+    height: 1px;
+    background: #d4af37;
+    opacity: 0.3;
+    margin-bottom: 24px;
 }
 
-.tips-list {
+.sidebar-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #d4af37;
+    margin: 0 0 20px 0;
+}
+
+.sidebar-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding-left: 16px;
-    margin: 0;
+    gap: 16px;
+    padding-left: 20px;
+    margin: 0 0 24px 0;
 }
 
-.tips-list li {
-    font-size: 13px;
-    color: #52525B;
-    line-height: 1.5;
+.sidebar-list li {
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #888;
 }
 
-@media (max-width: 768px) {
-    .create-wrap {
+.sidebar-quote {
+    padding: 20px 0;
+}
+
+.sidebar-quote p {
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    font-style: italic;
+    line-height: 1.6;
+    color: #aaa;
+    margin: 0 0 12px 0;
+}
+
+.quote-attribution {
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #666;
+}
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 900px) {
+    .editorial-layout {
         grid-template-columns: 1fr;
+        gap: 32px;
     }
 
-    .tips-panel { display: none; }
+    .editorial-form-section {
+        padding: 24px;
+    }
+
+    .editorial-sidebar {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
 }
 </style>

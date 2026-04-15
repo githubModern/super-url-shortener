@@ -49,18 +49,29 @@ const icons = {
             class="sidebar"
             :class="{ 'sidebar--collapsed': sidebarCollapsed, 'sidebar--open': mobileSidebarOpen }"
         >
+            <!-- Gold rule top accent -->
+            <div class="sidebar__rule-top"></div>
+
             <!-- Logo + Collapse Toggle -->
             <div class="sidebar__header">
                 <Link :href="route('dashboard')" class="sidebar__logo">
-                    <span class="sidebar__logo-icon">⚡</span>
                     <Transition name="slide-fade">
                         <span v-if="!sidebarCollapsed" class="sidebar__logo-text">ShortLink</span>
                     </Transition>
+                    <span v-if="sidebarCollapsed" class="sidebar__logo-monogram">SL</span>
                 </Link>
                 <button class="sidebar__collapse-btn" @click="toggleSidebar" :title="sidebarCollapsed ? 'Expand' : 'Collapse'">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon" :class="{ 'icon--flipped': sidebarCollapsed }" v-html="icons['chevron-left']" />
                 </button>
             </div>
+
+            <!-- Gold rule divider -->
+            <div class="sidebar__rule"></div>
+
+            <!-- Section label -->
+            <Transition name="slide-fade">
+                <div v-if="!sidebarCollapsed" class="sidebar__section-label">Navigation</div>
+            </Transition>
 
             <!-- Nav Items -->
             <nav class="sidebar__nav">
@@ -78,6 +89,9 @@ const icons = {
                     </Transition>
                 </Link>
             </nav>
+
+            <!-- Gold rule before footer -->
+            <div class="sidebar__rule"></div>
 
             <!-- User Footer -->
             <div class="sidebar__footer">
@@ -128,30 +142,35 @@ const icons = {
     </div>
 </template>
 
-<style scoped>
-/* ── Design tokens ──────────────────────────────── */
+<style>
+/* ── Global CSS variables (must be non-scoped so :root matches) ── */
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Oswald:wght@400;500;700&display=swap');
+
 :root {
-    --bg-primary: #0A0A0A;
-    --bg-secondary: #141414;
-    --bg-tertiary: #1A1A1A;
-    --text-primary: #FAFAFA;
-    --text-secondary: #A1A1AA;
-    --accent-cyan: #22D3EE;
-    --accent-success: #22C55E;
-    --accent-warning: #F59E0B;
-    --accent-danger: #EF4444;
     --sidebar-width: 240px;
     --sidebar-collapsed-width: 64px;
     --transition: 200ms ease;
+    --bg-light: #fafafa;
+    --sidebar-bg: #1a1a1a;
+    --text-dark: #1a1a1a;
+    --text-muted-dark: #888;
+    --text-muted-light: #999;
+    --accent-red: #e74c3c;
+    --accent-gold: #d4af37;
+    --rule-color: #333;
 }
+</style>
+
+<style scoped>
+/* ── Editorial Magazine Design Tokens ──────────── */
 
 /* ── Layout shell ───────────────────────────────── */
 .app-shell {
     display: flex;
     min-height: 100vh;
-    background: #0A0A0A;
-    color: #FAFAFA;
-    font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+    background: var(--bg-light);
+    color: var(--text-dark);
+    font-family: 'Crimson Pro', serif;
 }
 
 /* ── Sidebar ────────────────────────────────────── */
@@ -161,8 +180,8 @@ const icons = {
     left: 0;
     height: 100vh;
     width: var(--sidebar-width);
-    background: #141414;
-    border-right: 1px solid rgba(255,255,255,0.06);
+    background: var(--sidebar-bg);
+    border-right: 1px solid #2a2a2a;
     display: flex;
     flex-direction: column;
     transition: width var(--transition);
@@ -174,63 +193,99 @@ const icons = {
     width: var(--sidebar-collapsed-width);
 }
 
+/* ── Gold top rule accent ───────────────────────── */
+.sidebar__rule-top {
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-gold) 0%, transparent 100%);
+    flex-shrink: 0;
+}
+
+/* ── Gold horizontal rule dividers ─────────────── */
+.sidebar__rule {
+    height: 1px;
+    background: var(--accent-gold);
+    opacity: 0.25;
+    margin: 0 16px;
+    flex-shrink: 0;
+}
+
+/* ── Section label ──────────────────────────────── */
+.sidebar__section-label {
+    padding: 12px 20px 4px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--text-muted-dark);
+    white-space: nowrap;
+    overflow: hidden;
+}
+
 /* ── Sidebar Header ─────────────────────────────── */
 .sidebar__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    min-height: 64px;
+    padding: 24px 16px 20px;
+    min-height: 72px;
+    flex-shrink: 0;
 }
 
 .sidebar__logo {
     display: flex;
     align-items: center;
-    gap: 10px;
     text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
+}
+
+.sidebar__logo-text {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: #fff;
+    letter-spacing: 6px;
+    text-transform: uppercase;
     white-space: nowrap;
     overflow: hidden;
 }
 
-.sidebar__logo-icon {
-    font-size: 20px;
-    flex-shrink: 0;
-}
-
-.sidebar__logo-text {
-    font-family: 'Space Grotesk', sans-serif;
+.sidebar__logo-monogram {
+    font-family: 'Oswald', sans-serif;
     font-weight: 700;
-    font-size: 15px;
-    color: #FAFAFA;
-    letter-spacing: -0.02em;
+    font-size: 13px;
+    color: var(--accent-gold);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    flex-shrink: 0;
 }
 
 .sidebar__collapse-btn {
     background: none;
     border: none;
     cursor: pointer;
-    color: #A1A1AA;
+    color: var(--text-muted-dark);
     padding: 4px;
-    border-radius: 6px;
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    transition: color var(--transition), background var(--transition);
+    transition: color var(--transition);
 }
 
 .sidebar__collapse-btn:hover {
-    color: #FAFAFA;
-    background: rgba(255,255,255,0.06);
+    color: var(--accent-gold);
 }
 
 /* ── Nav Items ──────────────────────────────────── */
 .sidebar__nav {
     flex: 1;
-    padding: 12px 8px;
+    padding: 8px 0;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0;
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -238,68 +293,81 @@ const icons = {
 .sidebar__nav-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border-left: 2px solid transparent;
+    gap: 14px;
+    padding: 13px 20px;
+    border-left: 3px solid transparent;
     text-decoration: none;
-    color: #A1A1AA;
-    font-size: 14px;
+    color: var(--text-muted-dark);
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 4px;
+    text-transform: uppercase;
     white-space: nowrap;
-    transition: all var(--transition);
+    transition: color var(--transition), border-left-color var(--transition), background var(--transition);
     cursor: pointer;
 }
 
 .sidebar__nav-item:hover {
-    color: #FAFAFA;
-    background: rgba(255,255,255,0.05);
+    color: #fff;
+    background: rgba(255,255,255,0.04);
+    border-left-color: rgba(255,255,255,0.2);
 }
 
 .sidebar__nav-item--active {
-    color: #22D3EE;
-    border-left-color: #22D3EE;
-    background: rgba(34, 211, 238, 0.07);
+    color: #fff;
+    border-left-color: var(--accent-red);
+    background: rgba(231, 76, 60, 0.08);
 }
 
 .sidebar__nav-icon {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.sidebar__nav-item--active .sidebar__nav-icon {
+    opacity: 1;
+    color: var(--accent-red);
 }
 
 .sidebar__nav-label {
-    font-weight: 450;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 4px;
 }
 
 /* ── Footer ─────────────────────────────────────── */
 .sidebar__footer {
-    padding: 12px 8px;
-    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 12px 0 16px;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0;
+    flex-shrink: 0;
 }
 
 .sidebar__user {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
+    gap: 12px;
+    padding: 12px 20px;
     overflow: hidden;
-    margin-bottom: 4px;
 }
 
 .sidebar__avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #22D3EE, #22C55E);
+    width: 30px;
+    height: 30px;
+    background: transparent;
+    border: 1px solid var(--accent-gold);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 13px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
     font-weight: 700;
-    color: #0A0A0A;
+    letter-spacing: 1px;
+    color: var(--accent-gold);
     flex-shrink: 0;
 }
 
@@ -311,42 +379,53 @@ const icons = {
 }
 
 .sidebar__user-name {
-    font-size: 13px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
     font-weight: 600;
-    color: #FAFAFA;
+    color: #fff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .sidebar__user-email {
-    font-size: 11px;
-    color: #A1A1AA;
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-muted-dark);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-transform: uppercase;
 }
 
 .sidebar__logout {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: none;
+    gap: 14px;
+    padding: 13px 20px;
+    border-left: 3px solid transparent;
+    border-top: none;
+    border-right: none;
+    border-bottom: none;
     background: none;
     text-decoration: none;
-    color: #A1A1AA;
-    font-size: 14px;
+    color: var(--text-muted-dark);
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 4px;
+    text-transform: uppercase;
     white-space: nowrap;
     cursor: pointer;
     width: 100%;
-    transition: all var(--transition);
+    transition: color var(--transition), border-left-color var(--transition), background var(--transition);
 }
 
 .sidebar__logout:hover {
-    color: #EF4444;
-    background: rgba(239, 68, 68, 0.07);
+    color: var(--accent-red);
+    border-left-color: var(--accent-red);
+    background: rgba(231, 76, 60, 0.06);
 }
 
 /* ── Main Content ───────────────────────────────── */
@@ -366,11 +445,11 @@ const icons = {
 /* ── Top Bar ────────────────────────────────────── */
 .topbar {
     height: 64px;
-    background: #141414;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    background: var(--bg-light);
+    border-bottom: 1px solid #e0e0e0;
     display: flex;
     align-items: center;
-    padding: 0 24px;
+    padding: 0 32px;
     gap: 16px;
     position: sticky;
     top: 0;
@@ -381,29 +460,36 @@ const icons = {
     display: none;
     background: none;
     border: none;
-    color: #A1A1AA;
+    color: var(--text-muted-light);
     cursor: pointer;
     padding: 4px;
+    transition: color var(--transition);
+}
+
+.topbar__menu-btn:hover {
+    color: var(--text-dark);
 }
 
 .topbar__title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 18px;
-    font-weight: 600;
-    color: #FAFAFA;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--text-dark);
 }
 
 /* ── Page Content ───────────────────────────────── */
 .page-content {
     flex: 1;
-    padding: 28px 32px;
-    background: #0A0A0A;
+    padding: 36px 40px;
+    background: var(--bg-light);
 }
 
 /* ── Icons ──────────────────────────────────────── */
 .icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
 }
 
 .icon--flipped {
@@ -414,7 +500,7 @@ const icons = {
 .mobile-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.65);
     z-index: 40;
 }
 
@@ -449,7 +535,7 @@ const icons = {
     }
 
     .page-content {
-        padding: 20px 16px;
+        padding: 20px 20px;
     }
 }
 

@@ -27,23 +27,28 @@ const submit = () => {
 </script>
 
 <template>
-    <Head :title="`Edit /${link.short_code}`" />
+    <Head :title="`Edit /${link.short_code} — Editorial`" />
 
     <AuthenticatedLayout>
-        <template #header>Edit Link</template>
+        <template #header>Edit Entry</template>
 
-        <div class="edit-wrap">
-            <div class="edit-card">
+        <div class="editorial-layout">
+            <div class="editorial-form-section">
                 <!-- Short code badge -->
-                <div class="short-badge">
-                    <span class="short-badge__label">Short URL</span>
-                    <a :href="`/${link.short_code}`" target="_blank" class="short-badge__code">
+                <div class="entry-badge">
+                    <span class="badge-label">Entry Code</span>
+                    <a :href="`/${link.short_code}`" target="_blank" class="badge-code">
                         /{{ link.short_code }}
                     </a>
-                    <span v-if="link.custom_alias" class="short-badge__alias">(custom alias)</span>
+                    <span v-if="link.custom_alias" class="badge-alias">custom alias</span>
                 </div>
 
-                <form @submit.prevent="submit" class="edit-form">
+                <div class="form-header">
+                    <span class="roman-num">III.</span>
+                    <span class="section-label">Revision</span>
+                </div>
+
+                <form @submit.prevent="submit" class="editorial-form">
                     <!-- Destination URL -->
                     <div class="field">
                         <label class="field__label">Destination URL <span class="field__required">*</span></label>
@@ -72,7 +77,7 @@ const submit = () => {
 
                     <!-- Active toggle -->
                     <div class="field field--row">
-                        <label class="field__label">Link Status</label>
+                        <label class="field__label">Entry Status</label>
                         <label class="toggle">
                             <input type="checkbox" v-model="form.is_active" class="toggle__input" />
                             <span class="toggle__track">
@@ -85,7 +90,7 @@ const submit = () => {
                     <!-- Ad Settings -->
                     <div class="field">
                         <label class="field__label">Ad Display</label>
-                        <select v-model="form.ad_override" class="field__input">
+                        <select v-model="form.ad_override" class="field__input field__select">
                             <option value="inherit">Inherit global settings</option>
                             <option value="disable">Disable ads for this link</option>
                             <option value="force">Force specific ad</option>
@@ -93,7 +98,7 @@ const submit = () => {
                     </div>
                     <div v-if="form.ad_override === 'force'" class="field">
                         <label class="field__label">Select Ad</label>
-                        <select v-model="form.ad_id" class="field__input">
+                        <select v-model="form.ad_id" class="field__input field__select">
                             <option :value="null">-- Select an ad --</option>
                             <option v-for="ad in ads" :key="ad.id" :value="ad.id">{{ ad.name }} ({{ ad.format }})</option>
                         </select>
@@ -101,7 +106,8 @@ const submit = () => {
 
                     <!-- Advanced OG toggle -->
                     <button type="button" class="toggle-advanced" @click="showAdvanced = !showAdvanced">
-                        <span>{{ showAdvanced ? '▲' : '▼' }} Advanced (OG / Social Preview)</span>
+                        <span class="roman-num-small">{{ showAdvanced ? '▲' : '▼' }}</span>
+                        <span>Advanced (OG / Social Preview)</span>
                     </button>
 
                     <div v-if="showAdvanced" class="advanced-fields">
@@ -111,13 +117,13 @@ const submit = () => {
                         </div>
                         <div class="field">
                             <label class="field__label">OG Description</label>
-                            <textarea v-model="form.og_description" placeholder="Override link preview description" class="field__input field__textarea" rows="3" />
+                            <textarea v-model="form.og_description" placeholder="Override link preview description" class="field__textarea" rows="3" />
                         </div>
                     </div>
 
                     <!-- Actions -->
                     <div class="form-actions">
-                        <Link :href="route('links.show', link.id)" class="btn-ghost">Cancel</Link>
+                        <Link :href="route('links.show', link.id)" class="btn-secondary">Cancel</Link>
                         <button type="submit" class="btn-primary" :disabled="form.processing || !form.isDirty">
                             <span v-if="form.processing">Saving…</span>
                             <span v-else>Save Changes</span>
@@ -130,104 +136,198 @@ const submit = () => {
 </template>
 
 <style scoped>
-.edit-wrap {
-    max-width: 580px;
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Oswald:wght@400;500;700&display=swap');
+
+/* ── Editorial Layout ───────────────────────────── */
+.editorial-layout {
+    max-width: 600px;
 }
 
-.edit-card {
-    background: #141414;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
-    padding: 28px;
+.editorial-form-section {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 40px;
 }
 
-.short-badge {
+/* ── Entry Badge ────────────────────────────────── */
+.entry-badge {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    background: rgba(34,211,238,0.05);
-    border: 1px solid rgba(34,211,238,0.15);
-    border-radius: 8px;
-    margin-bottom: 24px;
+    gap: 16px;
+    padding: 16px 20px;
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 32px;
 }
 
-.short-badge__label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #52525B;
+.badge-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    color: #888;
 }
 
-.short-badge__code {
-    font-family: 'Space Grotesk', monospace;
-    font-size: 15px;
-    font-weight: 700;
-    color: #22D3EE;
+.badge-code {
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    color: #e74c3c;
     text-decoration: none;
 }
 
-.short-badge__alias {
-    font-size: 11px;
-    color: #52525B;
+.badge-code:hover {
+    text-decoration: underline;
 }
 
-.edit-form {
+.badge-alias {
+    font-family: 'Crimson Pro', serif;
+    font-size: 12px;
+    font-style: italic;
+    color: #d4af37;
+}
+
+/* ── Form Header ────────────────────────────────── */
+.form-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #1a1a1a;
+}
+
+.roman-num {
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #e74c3c;
+    letter-spacing: 2px;
+}
+
+.roman-num-small {
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    color: #888;
+}
+
+.section-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #1a1a1a;
+}
+
+.editorial-form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 28px;
 }
 
-/* ── Fields ─────────────────────────────────────── */
+/* ── Fields ──────────────────────────────────────── */
 .field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 10px;
 }
 
 .field--row {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
 }
 
 .field__label {
-    font-size: 13px;
-    font-weight: 500;
-    color: #A1A1AA;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #888;
 }
 
-.field__required { color: #EF4444; margin-left: 2px; }
-.field__optional { color: #52525B; font-weight: 400; }
+.field__required {
+    color: #e74c3c;
+    margin-left: 4px;
+}
+
+.field__optional {
+    font-family: 'Crimson Pro', serif;
+    font-size: 12px;
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0;
+    color: #aaa;
+    font-weight: 400;
+}
 
 .field__input {
-    background: #0A0A0A;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 14px;
-    color: #FAFAFA;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    padding: 12px 0;
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    color: #1a1a1a;
     outline: none;
-    transition: border-color 200ms;
-    font-family: inherit;
+    transition: border-color 0.3s;
     width: 100%;
 }
 
-.field__input:focus {
-    border-color: #22D3EE;
-    box-shadow: 0 0 0 3px rgba(34,211,238,0.08);
+.field__input::placeholder {
+    color: #bbb;
+    font-style: italic;
 }
 
-.field__input--error { border-color: #EF4444; }
-.field__textarea { resize: vertical; min-height: 80px; }
-.field__error { font-size: 12px; color: #EF4444; }
+.field__input:focus {
+    border-bottom-color: #e74c3c;
+}
 
-/* ── Toggle switch ───────────────────────────────── */
+.field__input--error {
+    border-bottom-color: #e74c3c;
+}
+
+.field__select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0 center;
+    padding-right: 20px;
+}
+
+.field__textarea {
+    background: transparent;
+    border: 1px solid #ddd;
+    padding: 16px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    color: #1a1a1a;
+    outline: none;
+    transition: border-color 0.3s;
+    resize: vertical;
+    min-height: 100px;
+}
+
+.field__textarea:focus {
+    border-color: #e74c3c;
+}
+
+.field__error {
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    font-style: italic;
+    color: #e74c3c;
+}
+
+/* ── Toggle Switch ───────────────────────────────── */
 .toggle {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
 }
 
@@ -236,100 +336,147 @@ const submit = () => {
 }
 
 .toggle__track {
-    width: 40px;
-    height: 22px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 11px;
+    width: 44px;
+    height: 24px;
+    background: #ddd;
     display: flex;
     align-items: center;
     padding: 2px;
-    transition: background 200ms;
+    transition: background 0.3s;
     position: relative;
 }
 
 .toggle__input:checked + .toggle__track {
-    background: #22D3EE;
+    background: #27ae60;
 }
 
 .toggle__thumb {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     background: #fff;
-    border-radius: 50%;
-    transition: transform 200ms;
+    transition: transform 0.3s;
 }
 
 .toggle__input:checked + .toggle__track .toggle__thumb {
-    transform: translateX(18px);
+    transform: translateX(20px);
 }
 
 .toggle__label {
-    font-size: 13px;
-    color: #A1A1AA;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
 }
 
-/* ── Advanced toggle ─────────────────────────────── */
+/* ── Advanced Toggle ────────────────────────────── */
 .toggle-advanced {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 12px;
-    color: #71717A;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
     text-align: left;
     padding: 0;
-    transition: color 200ms;
+    transition: color 0.3s;
 }
 
-.toggle-advanced:hover { color: #A1A1AA; }
+.toggle-advanced:hover {
+    color: #1a1a1a;
+}
 
 .advanced-fields {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    padding: 20px;
-    background: rgba(255,255,255,0.02);
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.05);
+    gap: 24px;
+    padding: 24px;
+    background: #fafafa;
+    border-left: 3px solid #d4af37;
 }
 
-/* ── Actions ─────────────────────────────────────── */
+/* ── Actions ───────────────────────────────────── */
 .form-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
-    padding-top: 8px;
-    border-top: 1px solid rgba(255,255,255,0.05);
+    gap: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #ddd;
+    margin-top: 8px;
 }
 
 .btn-primary {
     display: inline-flex;
     align-items: center;
-    padding: 10px 22px;
-    background: #22D3EE;
-    color: #0A0A0A;
-    font-size: 14px;
-    font-weight: 600;
-    border-radius: 8px;
+    padding: 14px 32px;
+    background: #e74c3c;
+    color: #fff;
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
     border: none;
     cursor: pointer;
-    transition: opacity 200ms;
+    transition: background 0.3s;
 }
 
-.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-primary:not(:disabled):hover { opacity: 0.85; }
+.btn-primary:hover:not(:disabled) {
+    background: #c0392b;
+}
 
-.btn-ghost {
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
     display: inline-flex;
     align-items: center;
-    padding: 10px 20px;
+    padding: 14px 28px;
     background: transparent;
-    color: #71717A;
-    font-size: 14px;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.08);
+    color: #888;
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
     text-decoration: none;
-    transition: all 200ms;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: all 0.3s;
 }
 
-.btn-ghost:hover { color: #FAFAFA; border-color: rgba(255,255,255,0.2); }
+.btn-secondary:hover {
+    color: #1a1a1a;
+    border-color: #1a1a1a;
+}
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 640px) {
+    .editorial-form-section {
+        padding: 24px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .field--row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}
 </style>
