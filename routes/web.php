@@ -36,6 +36,10 @@ Route::post('/guest/shorten', [GuestLinkController::class, 'store'])
     ->middleware('throttle:30,1')
     ->name('guest.shorten');
 
+// ── Public QR code for guest links ─────────────────────────────────────────
+Route::get('/guest/qr/{shortCode}', [QrCodeController::class, 'guestQr'])
+    ->name('guest.qr');
+
 // ── Legal Pages ───────────────────────────────────────────────────────────────
 Route::get('/privacy', fn() => Inertia::render('Legal/Privacy'))->name('legal.privacy');
 Route::get('/terms', fn() => Inertia::render('Legal/Terms'))->name('legal.terms');

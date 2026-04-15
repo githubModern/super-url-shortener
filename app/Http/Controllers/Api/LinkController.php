@@ -49,6 +49,8 @@ class LinkController extends ApiController
             'url' => ['required', 'url', 'max:2048'],
             'alias' => ['nullable', 'string', 'min:3', 'max:50', 'alpha_dash', 'unique:links,short_code', 'unique:links,custom_alias'],
             'campaign_tag' => ['nullable', 'string', 'max:100'],
+            'visibility' => ['required', 'in:public,private'],
+            'password' => ['required_if:visibility,private', 'nullable', 'string', 'min:6', 'max:255'],
         ]);
 
         if ($validator->fails()) {
@@ -64,6 +66,8 @@ class LinkController extends ApiController
             'destination_url' => $validated['url'],
             'custom_alias' => $validated['alias'] ?? null,
             'campaign_tag' => $validated['campaign_tag'] ?? null,
+            'visibility' => $validated['visibility'] ?? 'public',
+            'password' => $validated['password'] ?? null,
         ]);
 
         // Cache the redirect
@@ -118,6 +122,8 @@ class LinkController extends ApiController
             'url' => ['required', 'url', 'max:2048'],
             'alias' => ['nullable', 'string', 'min:3', 'max:50', 'alpha_dash', 'unique:links,short_code,' . $link->id, 'unique:links,custom_alias,' . $link->id],
             'campaign_tag' => ['nullable', 'string', 'max:100'],
+            'visibility' => ['required', 'in:public,private'],
+            'password' => ['required_if:visibility,private', 'nullable', 'string', 'min:6', 'max:255'],
         ]);
 
         if ($validator->fails()) {
@@ -137,6 +143,10 @@ class LinkController extends ApiController
 
         $link->destination_url = $validated['url'];
         $link->campaign_tag = $validated['campaign_tag'] ?? $link->campaign_tag;
+        $link->visibility = $validated['visibility'] ?? $link->visibility;
+        if (isset($validated['password'])) {
+            $link->password = $validated['password'];
+        }
         $link->save();
 
         // Update cache
@@ -188,6 +198,7 @@ class LinkController extends ApiController
             'alias' => $link->custom_alias,
             'campaign_tag' => $link->campaign_tag,
             'is_active' => $link->is_active,
+            'visibility' => $link->visibility,
             'clicks' => $link->clicks_count ?? 0,
             'created_at' => $link->created_at?->toIso8601String(),
             'updated_at' => $link->updated_at?->toIso8601String(),

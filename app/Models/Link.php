@@ -23,6 +23,8 @@ class Link extends Model
         'og_description',
         'og_image',
         'is_active',
+        'visibility',
+        'password',
         'expires_at',
         'clicks_count',
         'report_count',
@@ -33,11 +35,26 @@ class Link extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'visibility' => 'string',
         'expires_at' => 'datetime',
         'clicks_count' => 'integer',
         'report_count' => 'integer',
         'auto_suspended_at' => 'datetime',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::saving(function ($link) {
+            if ($link->visibility === 'private' && $link->password) {
+                $link->password = bcrypt($link->password);
+            }
+            if ($link->visibility === 'public') {
+                $link->password = null;
+            }
+        });
+    }
 
     public function user(): BelongsTo
     {

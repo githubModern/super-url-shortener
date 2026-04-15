@@ -9,11 +9,21 @@ const user = computed(() => page.props.auth.user);
 const sidebarCollapsed = ref(false);
 const mobileSidebarOpen = ref(false);
 
-const navItems = [
+const mainNavItems = [
     { label: 'Dashboard', icon: 'grid', route: 'dashboard' },
     { label: 'My Links', icon: 'link', route: 'links.index' },
+    { label: 'Create Link', icon: 'plus', route: 'links.create' },
+    { label: 'Bulk Create', icon: 'layers', route: 'links.bulk' },
+];
+
+const toolsNavItems = [
     { label: 'Analytics', icon: 'bar-chart', route: 'dashboard' },
-    { label: 'Affiliate', icon: 'dollar-sign', route: 'dashboard' },
+    { label: 'Affiliate', icon: 'dollar-sign', route: 'affiliate.index' },
+];
+
+const supportNavItems = [
+    { label: 'Help Center', icon: 'help-circle', route: 'help.center' },
+    { label: 'API Docs', icon: 'code', route: 'api.docs' },
     { label: 'Settings', icon: 'settings', route: 'profile.edit' },
 ];
 
@@ -29,6 +39,10 @@ const icons = {
     'log-out': `<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>`,
     menu: `<line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>`,
     'chevron-left': `<polyline points="15 18 9 12 15 6"/>`,
+    plus: `<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>`,
+    layers: `<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>`,
+    'help-circle': `<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>`,
+    code: `<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>`,
 };
 </script>
 
@@ -68,15 +82,59 @@ const icons = {
             <!-- Gold rule divider -->
             <div class="sidebar__rule"></div>
 
-            <!-- Section label -->
+            <!-- Main Section -->
             <Transition name="slide-fade">
-                <div v-if="!sidebarCollapsed" class="sidebar__section-label">Navigation</div>
+                <div v-if="!sidebarCollapsed" class="sidebar__section-label">Main</div>
             </Transition>
-
-            <!-- Nav Items -->
             <nav class="sidebar__nav">
                 <Link
-                    v-for="item in navItems"
+                    v-for="item in mainNavItems"
+                    :key="item.route"
+                    :href="route(item.route)"
+                    class="sidebar__nav-item"
+                    :class="{ 'sidebar__nav-item--active': route().current(item.route) || (item.route === 'links.index' && route().current('links.*') && !route().current('links.create') && !route().current('links.bulk')) }"
+                    :title="sidebarCollapsed ? item.label : ''"
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="sidebar__nav-icon" v-html="icons[item.icon]" />
+                    <Transition name="slide-fade">
+                        <span v-if="!sidebarCollapsed" class="sidebar__nav-label">{{ item.label }}</span>
+                    </Transition>
+                </Link>
+            </nav>
+
+            <!-- Gold rule divider -->
+            <div class="sidebar__rule"></div>
+
+            <!-- Tools Section -->
+            <Transition name="slide-fade">
+                <div v-if="!sidebarCollapsed" class="sidebar__section-label">Tools</div>
+            </Transition>
+            <nav class="sidebar__nav">
+                <Link
+                    v-for="item in toolsNavItems"
+                    :key="item.route"
+                    :href="route(item.route)"
+                    class="sidebar__nav-item"
+                    :class="{ 'sidebar__nav-item--active': route().current(item.route) }"
+                    :title="sidebarCollapsed ? item.label : ''"
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="sidebar__nav-icon" v-html="icons[item.icon]" />
+                    <Transition name="slide-fade">
+                        <span v-if="!sidebarCollapsed" class="sidebar__nav-label">{{ item.label }}</span>
+                    </Transition>
+                </Link>
+            </nav>
+
+            <!-- Gold rule divider -->
+            <div class="sidebar__rule"></div>
+
+            <!-- Support Section -->
+            <Transition name="slide-fade">
+                <div v-if="!sidebarCollapsed" class="sidebar__section-label">Support</div>
+            </Transition>
+            <nav class="sidebar__nav">
+                <Link
+                    v-for="item in supportNavItems"
                     :key="item.route"
                     :href="route(item.route)"
                     class="sidebar__nav-item"
@@ -211,15 +269,16 @@ const icons = {
 
 /* ── Section label ──────────────────────────────── */
 .sidebar__section-label {
-    padding: 12px 20px 4px;
+    padding: 16px 20px 6px;
     font-family: 'Oswald', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     color: var(--text-muted-dark);
     white-space: nowrap;
     overflow: hidden;
+    opacity: 0.7;
 }
 
 /* ── Sidebar Header ─────────────────────────────── */
@@ -245,9 +304,9 @@ const icons = {
 .sidebar__logo-text {
     font-family: 'Oswald', sans-serif;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 15px;
     color: #fff;
-    letter-spacing: 6px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     white-space: nowrap;
     overflow: hidden;
@@ -256,9 +315,9 @@ const icons = {
 .sidebar__logo-monogram {
     font-family: 'Oswald', sans-serif;
     font-weight: 700;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--accent-gold);
-    letter-spacing: 3px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     flex-shrink: 0;
 }
@@ -294,30 +353,44 @@ const icons = {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 13px 20px;
-    border-left: 3px solid transparent;
+    padding: 12px 20px;
+    margin: 2px 8px;
+    border-radius: 6px;
+    border-left: none;
     text-decoration: none;
     color: var(--text-muted-dark);
     font-family: 'Oswald', sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
-    letter-spacing: 4px;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
     white-space: nowrap;
-    transition: color var(--transition), border-left-color var(--transition), background var(--transition);
+    transition: all 200ms ease;
     cursor: pointer;
+    position: relative;
 }
 
 .sidebar__nav-item:hover {
     color: #fff;
-    background: rgba(255,255,255,0.04);
-    border-left-color: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.06);
 }
 
 .sidebar__nav-item--active {
     color: #fff;
-    border-left-color: var(--accent-red);
-    background: rgba(231, 76, 60, 0.08);
+    background: rgba(212, 175, 55, 0.15);
+    box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.3);
+}
+
+.sidebar__nav-item--active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    background: var(--accent-gold);
+    border-radius: 0 2px 2px 0;
 }
 
 .sidebar__nav-icon {
@@ -329,13 +402,14 @@ const icons = {
 
 .sidebar__nav-item--active .sidebar__nav-icon {
     opacity: 1;
-    color: var(--accent-red);
+    color: var(--accent-gold);
 }
 
 .sidebar__nav-label {
     font-family: 'Oswald', sans-serif;
-    font-size: 11px;
-    letter-spacing: 4px;
+    font-size: 12px;
+    letter-spacing: 0;
+    font-weight: 500;
 }
 
 /* ── Footer ─────────────────────────────────────── */
@@ -356,17 +430,18 @@ const icons = {
 }
 
 .sidebar__avatar {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     background: transparent;
     border: 1px solid var(--accent-gold);
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Oswald', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
     color: var(--accent-gold);
     flex-shrink: 0;
 }
@@ -391,41 +466,38 @@ const icons = {
 .sidebar__user-email {
     font-family: 'Oswald', sans-serif;
     font-size: 10px;
-    letter-spacing: 2px;
+    letter-spacing: 0;
     color: var(--text-muted-dark);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-transform: uppercase;
 }
 
 .sidebar__logout {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 13px 20px;
-    border-left: 3px solid transparent;
-    border-top: none;
-    border-right: none;
-    border-bottom: none;
+    padding: 12px 20px;
+    margin: 2px 8px;
+    border-radius: 6px;
+    border: none;
     background: none;
     text-decoration: none;
     color: var(--text-muted-dark);
     font-family: 'Oswald', sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
-    letter-spacing: 4px;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
     white-space: nowrap;
     cursor: pointer;
-    width: 100%;
-    transition: color var(--transition), border-left-color var(--transition), background var(--transition);
+    width: calc(100% - 16px);
+    transition: all 200ms ease;
 }
 
 .sidebar__logout:hover {
     color: var(--accent-red);
-    border-left-color: var(--accent-red);
-    background: rgba(231, 76, 60, 0.06);
+    background: rgba(231, 76, 60, 0.1);
 }
 
 /* ── Main Content ───────────────────────────────── */
@@ -472,10 +544,10 @@ const icons = {
 
 .topbar__title {
     font-family: 'Oswald', sans-serif;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 500;
-    letter-spacing: 4px;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
     color: var(--text-dark);
 }
 

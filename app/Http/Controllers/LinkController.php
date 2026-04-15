@@ -50,6 +50,8 @@ class LinkController extends Controller
             'destination_url' => ['required', 'url', 'max:2048'],
             'custom_alias' => ['nullable', 'string', 'min:4', 'max:20', 'alpha_dash', 'unique:links'],
             'campaign_tag' => ['nullable', 'string', 'max:100'],
+            'visibility' => ['required', 'in:public,private'],
+            'password' => ['required_if:visibility,private', 'nullable', 'string', 'min:6', 'max:255'],
         ]);
 
         $shortCode = $validated['custom_alias'] ?? $this->shortCodeService->generate();
@@ -60,6 +62,8 @@ class LinkController extends Controller
             'destination_url' => $validated['destination_url'],
             'custom_alias' => $validated['custom_alias'] ?? null,
             'campaign_tag' => $validated['campaign_tag'] ?? null,
+            'visibility' => $validated['visibility'] ?? 'public',
+            'password' => $validated['password'] ?? null,
         ]);
 
         // Cache the redirect
@@ -185,6 +189,8 @@ class LinkController extends Controller
             'og_description' => ['nullable', 'string'],
             'ad_override' => ['required', 'in:inherit,disable,force'],
             'ad_id' => ['nullable', 'exists:ads,id'],
+            'visibility' => ['required', 'in:public,private'],
+            'password' => ['required_if:visibility,private', 'nullable', 'string', 'min:6', 'max:255'],
         ]);
 
         // Clear ad_id if not using force override

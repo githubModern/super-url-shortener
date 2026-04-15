@@ -43,6 +43,7 @@ class GuestLinkController extends Controller
 
         if ($existing) {
             return response()->json([
+                'id'         => $existing->id,
                 'short_url'  => $existing->short_url,
                 'short_code' => $existing->short_code,
             ]);
@@ -56,6 +57,7 @@ class GuestLinkController extends Controller
         ]);
 
         return response()->json([
+            'id'         => $link->id,
             'short_url'  => $link->short_url,
             'short_code' => $link->short_code,
         ]);

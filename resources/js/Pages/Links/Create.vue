@@ -10,6 +10,8 @@ const form = useForm({
     campaign_tag: '',
     og_title: '',
     og_description: '',
+    visibility: 'public',
+    password: '',
 });
 
 const showAdvanced = ref(false);
@@ -83,6 +85,49 @@ const submit = () => {
                         />
                     </div>
 
+                    <!-- Visibility Toggle -->
+                    <div class="field">
+                        <label class="field__label">Visibility</label>
+                        <div class="visibility-toggle">
+                            <button
+                                type="button"
+                                class="visibility-btn"
+                                :class="{ 'visibility-btn--active': form.visibility === 'public' }"
+                                @click="form.visibility = 'public'"
+                            >
+                                <span class="visibility-icon">🌐</span>
+                                <span class="visibility-label">Public</span>
+                            </button>
+                            <button
+                                type="button"
+                                class="visibility-btn"
+                                :class="{ 'visibility-btn--active': form.visibility === 'private' }"
+                                @click="form.visibility = 'private'"
+                            >
+                                <span class="visibility-icon">🔒</span>
+                                <span class="visibility-label">Private</span>
+                            </button>
+                        </div>
+                        <span v-if="form.errors.visibility" class="field__error">{{ form.errors.visibility }}</span>
+                        <span class="field__hint">{{ form.visibility === 'public' ? 'Anyone can view analytics for this link' : 'Password required to view analytics' }}</span>
+                    </div>
+
+                    <!-- Password Field (shown only for private links) -->
+                    <div v-if="form.visibility === 'private'" class="field">
+                        <label class="field__label">Password <span class="field__required">*</span></label>
+                        <input
+                            v-model="form.password"
+                            type="password"
+                            placeholder="Enter password for private link (min 6 characters)"
+                            class="field__input"
+                            :class="{ 'field__input--error': form.errors.password }"
+                            minlength="6"
+                            required
+                        />
+                        <span v-if="form.errors.password" class="field__error">{{ form.errors.password }}</span>
+                        <span class="field__hint">Minimum 6 characters required</span>
+                    </div>
+
                     <!-- Advanced OG toggle -->
                     <button type="button" class="toggle-advanced" @click="showAdvanced = !showAdvanced">
                         <span class="roman-num-small">{{ showAdvanced ? '▲' : '▼' }}</span>
@@ -119,7 +164,8 @@ const submit = () => {
                     <li>Custom aliases make your links more recognizable and memorable.</li>
                     <li>Campaign tags let you group and filter links in analytics.</li>
                     <li>OG fields control how links appear when shared on social media.</li>
-                    <li>Links without expiry stay active indefinitely.</li>
+                    <li>Private links require a password — only those with the password can view analytics.</li>
+                    <li>Public links allow anyone to view their analytics statistics.</li>
                 </ul>
 
                 <div class="sidebar-rule"></div>
@@ -301,6 +347,53 @@ const submit = () => {
     font-size: 12px;
     font-style: italic;
     color: #aaa;
+}
+
+/* ── Visibility Toggle ─────────────────────────── */
+.visibility-toggle {
+    display: flex;
+    gap: 12px;
+}
+
+.visibility-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: #fafafa;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
+}
+
+.visibility-btn:hover {
+    border-color: #ccc;
+    color: #666;
+}
+
+.visibility-btn--active {
+    background: #1a1a1a;
+    border-color: #1a1a1a;
+    color: #fff;
+}
+
+.visibility-btn--active:hover {
+    background: #333;
+    border-color: #333;
+    color: #fff;
+}
+
+.visibility-icon {
+    font-size: 14px;
+}
+
+.visibility-label {
+    font-weight: 500;
 }
 
 /* ── Advanced Toggle ────────────────────────────── */

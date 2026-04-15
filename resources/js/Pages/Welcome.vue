@@ -139,17 +139,29 @@ const scrollToSection = (id) => {
                         <div v-if="error" class="form-message form-message--error">{{ error }}</div>
                         
                         <div v-if="result" class="form-message form-message--success">
-                            <a :href="result.short_url" target="_blank" class="result-link">{{ result.short_url }}</a>
-                            <button type="button" @click="copy" class="copy-mini">
-                                {{ copied ? 'Copied!' : 'Copy' }}
-                            </button>
+                            <div class="result-main">
+                                <a :href="result.short_url" target="_blank" class="result-link">{{ result.short_url }}</a>
+                                <button type="button" @click="copy" class="copy-mini">
+                                    {{ copied ? 'Copied!' : 'Copy' }}
+                                </button>
+                            </div>
+                            <div class="result-qr">
+                                <img :src="`/guest/qr/${result.short_code}`" alt="QR Code" class="qr-image" />
+                                <span class="qr-label">Scan to open</span>
+                            </div>
                         </div>
                     </form>
                     
                     <p v-if="!$page.props.auth?.user" class="hero-footnote">
-                        <Link :href="route('register')" class="accent-link">Create an account</Link> 
+                        <Link :href="route('register')" class="accent-link">Create an account</Link>
                         for saved links & advanced analytics
                     </p>
+
+                    <div class="hero-actions-row">
+                        <Link :href="route('links.bulk')" class="editorial-btn editorial-btn--accent">
+                            Bulk Shorten
+                        </Link>
+                    </div>
                 </div>
             </div>
 
@@ -653,6 +665,47 @@ const scrollToSection = (id) => {
     cursor: not-allowed;
 }
 
+/* Editorial Button Styles */
+.hero-actions-row {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.editorial-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 16px 32px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+.editorial-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-2px);
+}
+
+.editorial-btn--accent {
+    background: #e74c3c;
+    border-color: #e74c3c;
+}
+
+.editorial-btn--accent:hover {
+    background: #c0392b;
+    border-color: #c0392b;
+}
+
 .form-message {
     margin-top: 16px;
     padding: 16px 20px;
@@ -667,17 +720,52 @@ const scrollToSection = (id) => {
 }
 
 .form-message--success {
-    background: rgba(46, 204, 113, 0.1);
-    border: 1px solid rgba(46, 204, 113, 0.3);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px;
+}
+
+.result-main {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
     flex-wrap: wrap;
+    width: 100%;
+}
+
+.result-qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    width: 100%;
+}
+
+.qr-image {
+    width: 140px;
+    height: 140px;
+    background: #fff;
+    padding: 12px;
+    border-radius: 4px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.qr-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
 }
 
 .result-link {
-    color: #27ae60;
+    color: #d4af37;
     text-decoration: none;
     font-size: 18px;
     font-weight: 600;
@@ -686,13 +774,14 @@ const scrollToSection = (id) => {
 
 .result-link:hover {
     text-decoration: underline;
+    color: #e5c158;
 }
 
 .copy-mini {
     padding: 8px 16px;
     background: transparent;
-    border: 1px solid #27ae60;
-    color: #27ae60;
+    border: 1px solid #d4af37;
+    color: #d4af37;
     font-family: 'Oswald', sans-serif;
     font-size: 11px;
     letter-spacing: 1px;
@@ -702,8 +791,8 @@ const scrollToSection = (id) => {
 }
 
 .copy-mini:hover {
-    background: #27ae60;
-    color: #fff;
+    background: #d4af37;
+    color: #0a0a0a;
 }
 
 .hero-footnote {

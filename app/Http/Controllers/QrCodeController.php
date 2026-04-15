@@ -41,5 +41,27 @@ class QrCodeController extends Controller
             'Content-Disposition' => "attachment; filename=\"qr-{$link->short_code}.svg\"",
         ]);
     }
+
+    /**
+     * Generate a QR code for a guest link (no auth required).
+     */
+    public function guestQr(string $shortCode): Response
+    {
+        $link = Link::where('short_code', $shortCode)
+            ->whereNull('user_id')
+            ->active()
+            ->firstOrFail();
+
+        $shortUrl = $link->short_url;
+
+        $qr = QrCode::format('svg')
+            ->size(300)
+            ->errorCorrection('H')
+            ->generate($shortUrl);
+
+        return response($qr, 200, [
+            'Content-Type' => 'image/svg+xml',
+        ]);
+    }
 }
 
